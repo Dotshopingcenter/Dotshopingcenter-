@@ -1,8 +1,9 @@
-
-let cart = 0;
+let cart = [];
 
 function addToCart(productName) {
-    cart++;
-    document.getElementById("cart-count").innerText = cart;
+    cart.push(productName);
+
+    document.getElementById("cart-count").innerText = cart.length;
+
     alert(productName + " added to cart!");
 }
