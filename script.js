@@ -7,3 +7,6 @@ function addToCart(productName) {
 
     alert(productName + " added to cart!");
 }
+function viewCart() {
+    alert("Items in cart:\n\n" + cart.join("\n"));
+}
