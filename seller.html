@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ead<!DOCTYPE html>
 <html>
 <head>
     <title>Seller Dashboard</title>
@@ -9,17 +9,23 @@
 
 <h2>Add Product</h2>
 
-<form>
-    <input type="text" placeholder="Product Name"><br><br>
+<form onsubmit="addProduct(); return false;">
+    <input type="text" id="name" placeholder="Product Name"><br><br>
 
-    <input type="number" placeholder="Price"><br><br>
+    <input type="number" id="price" placeholder="Price"><br><br>
 
-    <textarea placeholder="Product Description"></textarea><br><br>
+    <textarea id="description" placeholder="Product Description"></textarea><br><br>
 
     <button type="submit">Add Product</button>
 </form>
 
 <p><a href="index.html">Back to Home</a></p>
+
+<script>
+function addProduct() {
+    alert("Product added successfully!");
+}
+</script>
 
 </body>
 </html>
