@@ -18,10 +18,8 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 let cart = [];
-let allProducts = [];
 
-// Cart
-window.addToCart = function(productName) {
+function addToCart(productName) {
     cart.push(productName);
 
     const cartCount = document.getElementById("cart-count");
@@ -31,101 +29,70 @@ window.addToCart = function(productName) {
     }
 
     alert(productName + " added to cart!");
-};
+}
 
-window.viewCart = function() {
+function viewCart() {
     if (cart.length === 0) {
         alert("Your cart is empty.");
     } else {
         alert("Items in cart:\n\n" + cart.join("\n"));
     }
-};
+}
 
-// Load products from Firebase
 async function loadProducts() {
     const container = document.getElementById("products-container");
 
     try {
         const snapshot = await getDocs(collection(db, "products"));
 
-        allProducts = [];
+        container.innerHTML = "";
 
         snapshot.forEach((doc) => {
-            allProducts.push({
-                id: doc.id,
-                ...doc.data()
-            });
+            const product = doc.data();
+
+            const name = product.Name || product.name || "Unnamed Product";
+            const price = product.Price || product.price || "0";
+            const description =
+                product.Description ||
+                product.description ||
+                "No description available.";
+
+            container.innerHTML += `
+                <div class="product">
+                    <h3>${name}</h3>
+                    <p><strong>Price:</strong> $${price}</p>
+                    <p>${description}</p>
+                    <button onclick="addToCart('${name}')">
+                        🛒 Add to Cart
+                    </button>
+                </div>
+            `;
         });
 
-        displayProducts(allProducts);
-
     } catch (error) {
-        console.error("Firebase error:", error);
-
-        container.innerHTML =
-            "<p>Unable to load products. Please try again later.</p>";
+        console.error("Error loading products:", error);
+        container.innerHTML = "<p>Unable to load products.</p>";
     }
 }
 
-// Display products
-function displayProducts(products) {
-    const container = document.getElementById("products-container");
+function searchProducts() {
+    const searchText = document
+        .getElementById("searchInput")
+        .value
+        .toLowerCase();
 
-    container.innerHTML = "";
-
-    if (products.length === 0) {
-        container.innerHTML = "<p>No products available.</p>";
-        return;
-    }
+    const products = document.querySelectorAll(".product");
 
     products.forEach((product) => {
-
-        const card = document.createElement("div");
-        card.className = "product";
-
-        const name = product.name || "Unnamed Product";
-        const price = product.price || "0";
-        const description =
-            product.description || "No description available.";
-
-        card.innerHTML = `
-            <h3>${name}</h3>
-            <p><strong>Price:</strong> $${price}</p>
-            <p>${description}</p>
-
-            <button onclick="addToCart('${name.replace(/'/g, "\\'")}')">
-                🛒 Add to Cart
-            </button>
-        `;
-
-        container.appendChild(card);
+        product.style.display =
+            product.innerText.toLowerCase().includes(searchText)
+                ? "block"
+                : "none";
     });
 }
 
-// Search products
-window.searchProducts = function() {
+window.addToCart = addToCart;
+window.viewCart = viewCart;
+window.searchProducts = searchProducts;
 
-    const searchInput = document.getElementById("searchInput");
-
-    const searchText =
-        searchInput.value.toLowerCase().trim();
-
-    const filteredProducts = allProducts.filter((product) => {
-
-        const name =
-            (product.name || "").toLowerCase();
-
-        const description =
-            (product.description || "").toLowerCase();
-
-        return (
-            name.includes(searchText) ||
-            description.includes(searchText)
-        );
-    });
-
-    displayProducts(filteredProducts);
-};
-
-// Start
 loadProducts();
