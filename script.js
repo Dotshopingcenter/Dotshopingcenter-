@@ -1,82 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seller Dashboard - Dot Shopping Center</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-    
-<body>
-
-<header>
-    <h1>🛍️ Dot Shopping Center</h1>
-    <p>Seller Dashboard</p>
-</header>
-
-<nav>
-    <a href="index.html">Home</a>
-    <a href="seller.html">Seller Dashboard</a>
-</nav>
-
-<section>
-    <h2>➕ Add Product</h2>
-
-    <form id="productForm">
-
-        <label>Product Name</label><br>
-        <input
-            type="text"
-            id="name"
-            placeholder="Product Name"
-            required
-        >
-
-        <br><br>
-
-        <label>Price</label><br>
-        <input
-            type="number"
-            id="price"
-            placeholder="Price"
-            required
-        >
-
-        <br><br>
-
-        <label>Product Description</label><br>
-        <textarea
-            id="description"
-            placeholder="Product Description"
-            required
-        ></textarea>
-
-        <br><br>
-
-        <button type="submit">
-            ➕ Add Product
-        </button>
-
-    </form>
-
-    <p id="message"></p>
-
-    <p>
-        <a href="index.html">⬅️ Back to Home</a>
-    </p>
-</section>
-
-<script type="module">
-
-import { initializeApp }
-from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 
 import {
     getFirestore,
     collection,
-    addDoc
-}
-from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+    getDocs
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 
 const firebaseConfig = {
@@ -93,56 +21,225 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 
-const form = document.getElementById("productForm");
-const message = document.getElementById("message");
+let cart = [];
+let allProducts = [];
 
 
-form.addEventListener("submit", async function(event) {
+/* CART */
 
-    event.preventDefault();
+window.addToCart = function(productName) {
 
-    const name = document.getElementById("name").value.trim();
-    const price = document.getElementById("price").value;
-    const description =
-        document.getElementById("description").value.trim();
+    cart.push(productName);
+
+    document.getElementById("cart-count").innerText =
+        cart.length;
+
+    alert(productName + " added to cart!");
+};
 
 
-    if (!name || !price || !description) {
-        message.innerText = "Please fill in all fields.";
-        return;
+window.viewCart = function() {
+
+    if (cart.length === 0) {
+
+        alert("Your cart is empty.");
+
+    } else {
+
+        alert(
+            "Items in cart:\n\n" +
+            cart.join("\n")
+        );
+
     }
 
+};
+
+
+/* LOAD PRODUCTS */
+
+async function loadProducts() {
+
+    const container =
+        document.getElementById("products-container");
 
     try {
 
-        await addDoc(collection(db, "products"), {
+        const snapshot =
+            await getDocs(
+                collection(db, "products")
+            );
 
-            name: name,
-            price: Number(price),
-            description: description
+
+        allProducts = [];
+
+
+        snapshot.forEach((doc) => {
+
+            const product = doc.data();
+
+            allProducts.push(product);
 
         });
 
 
-        message.innerText =
-            "✅ Product added successfully!";
-
-
-        form.reset();
+        displayProducts(allProducts);
 
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "Firebase error:",
+            error
+        );
 
-        message.innerText =
-            "❌ Error adding product.";
+        container.innerHTML =
+            "<p>❌ Unable to load products.</p>";
 
     }
 
-});
+}
 
-</script>
 
-</body>
-</html>
+/* DISPLAY PRODUCTS */
+
+function displayProducts(products) {
+
+    const container =
+        document.getElementById(
+            "products-container"
+        );
+
+
+    container.innerHTML = "";
+
+
+    if (products.length === 0) {
+
+        container.innerHTML =
+            "<p>No products available.</p>";
+
+        return;
+
+    }
+
+
+    products.forEach((product) => {
+
+        const name =
+            product.name ||
+            product.Name ||
+            "Unnamed Product";
+
+
+        const price =
+            product.price ??
+            product.Price ??
+            0;
+
+
+        const description =
+            product.description ||
+            product.Description ||
+            "No description available.";
+
+
+        const card =
+            document.createElement("div");
+
+
+        card.className = "product";
+
+
+        card.innerHTML = `
+
+            <h3>${name}</h3>
+
+            <p>
+                <strong>Price:</strong>
+                $${price}
+            </p>
+
+            <p>
+                ${description}
+            </p>
+
+            <button>
+                🛒 Add to Cart
+            </button>
+
+        `;
+
+
+        card
+            .querySelector("button")
+            .addEventListener(
+                "click",
+                function() {
+
+                    window.addToCart(name);
+
+                }
+            );
+
+
+        container.appendChild(card);
+
+    });
+
+}
+
+
+/* SEARCH */
+
+window.searchProducts = function() {
+
+    const input =
+        document.getElementById(
+            "searchInput"
+        );
+
+
+    const searchText =
+        input.value
+            .toLowerCase()
+            .trim();
+
+
+    const filtered =
+        allProducts.filter(
+            function(product) {
+
+                const name =
+                    (
+                        product.name ||
+                        product.Name ||
+                        ""
+                    ).toLowerCase();
+
+
+                const description =
+                    (
+                        product.description ||
+                        product.Description ||
+                        ""
+                    ).toLowerCase();
+
+
+                return (
+                    name.includes(searchText) ||
+                    description.includes(searchText)
+                );
+
+            }
+        );
+
+
+    displayProducts(filtered);
+
+};
+
+
+/* START */
+
+loadProducts();
