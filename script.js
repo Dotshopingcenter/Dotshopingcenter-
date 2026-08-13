@@ -6,7 +6,7 @@
     <title>Seller Dashboard - Dot Shopping Center</title>
     <link rel="stylesheet" href="style.css">
 </head>
-
+    
 <body>
 
 <header>
