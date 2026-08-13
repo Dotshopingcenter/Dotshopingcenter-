@@ -1,30 +1,108 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Seller Dashboard</title>
 </head>
+
 <body>
 
 <h1>Seller Dashboard</h1>
 
 <h2>Add Product</h2>
 
-<form onsubmit="addProduct(); return false;">
-    <input type="text" id="name" placeholder="Product Name"><br><br>
+<form id="productForm">
 
-    <input type="number" id="price" placeholder="Price"><br><br>
+    <input
+        type="text"
+        id="name"
+        placeholder="Product Name"
+        required
+    >
+    <br><br>
 
-    <textarea id="description" placeholder="Product Description"></textarea><br><br>
+    <input
+        type="number"
+        id="price"
+        placeholder="Price"
+        required
+    >
+    <br><br>
+
+    <textarea
+        id="description"
+        placeholder="Product Description"
+        required
+    ></textarea>
+    <br><br>
 
     <button type="submit">Add Product</button>
+
 </form>
 
-<p><a href="index.html">Back to Home</a></p>
+<p>
+    <a href="index.html">Back to Home</a>
+</p>
 
-<script>
-function addProduct() {
-    alert("Product added successfully!");
+
+<script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+
+import {
+    getFirestore,
+    collection,
+    addDoc
 }
+from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+
+const firebaseConfig = {
+    apiKey: "AIzaSyD5F0neUZryQSzxO3o8XpNdnWpeDxwuImo",
+    authDomain: "dot-shopping-center.firebaseapp.com",
+    projectId: "dot-shopping-center",
+    storageBucket: "dot-shopping-center.firebasestorage.app",
+    messagingSenderId: "673341901162",
+    appId: "1:673341901162:web:eab55a275f11015e1a7d13"
+};
+
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+
+document.getElementById("productForm").addEventListener("submit", async function(event) {
+
+    event.preventDefault();
+
+    const name = document.getElementById("name").value;
+    const price = document.getElementById("price").value;
+    const description = document.getElementById("description").value;
+
+    try {
+
+        await addDoc(collection(db, "products"), {
+            name: name,
+            price: price,
+            description: description
+        });
+
+        alert("Product added successfully!");
+
+        document.getElementById("productForm").reset();
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert("Error adding product: " + error.message);
+
+    }
+
+});
+
 </script>
 
 </body>
