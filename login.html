@@ -1,23 +1,85 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Dot Shopping Center</title>
 </head>
+
 <body>
 
-<h1>Login</h1>
+    <h1>Login to Dot Shopping Center</h1>
 
-<form>
-    <input type="email" placeholder="Email"><br><br>
+    <form id="loginForm">
+        <input
+            type="email"
+            id="email"
+            placeholder="Email address"
+            required
+        >
+        <br><br>
 
-    <input type="password" placeholder="Password"><br><br>
+        <input
+            type="password"
+            id="password"
+            placeholder="Password"
+            required
+        >
+        <br><br>
 
-    <a href="seller.html">
-    <button type="button">Login</button>
-</a>
-</form>
+        <button type="submit">Login</button>
+    </form>
 
-<p>Don't have an account? Register</p>
+    <p id="message"></p>
+
+    <p>
+        Don't have an account?
+        <a href="register.html">Register here</a>
+    </p>
+
+    <p><a href="index.html">Back to Home</a></p>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+
+        import {
+            getAuth,
+            signInWithEmailAndPassword
+        } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5F0neUZryQSzxO3o8XpNdnWpeDxwuImo",
+            authDomain: "dot-shopping-center.firebaseapp.com",
+            projectId: "dot-shopping-center",
+            storageBucket: "dot-shopping-center.firebasestorage.app",
+            messagingSenderId: "673341901162",
+            appId: "1:673341901162:web:eab55a275f11015e1a7d13"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        document.getElementById("loginForm").addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value;
+            const message = document.getElementById("message");
+
+            message.textContent = "Signing in...";
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+
+                message.textContent = "Login successful!";
+
+                window.location.href = "index.html";
+            } catch (error) {
+                console.error(error);
+                message.textContent = "Login failed. Check your email and password, and make sure you have registered.";
+            }
+        });
+    </script>
 
 </body>
 </html>
